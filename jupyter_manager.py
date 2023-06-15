@@ -1,11 +1,9 @@
 import os
-import threading
 import subprocess
 import sys
+import threading
 from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QHBoxLayout, QLabel, QLineEdit, QPushButton, \
-    QFileDialog, QTextEdit, QErrorMessage, QComboBox
-from PyQt5.QtCore import pyqtSignal, Qt
-from colorama import init
+    QTextEdit
 
 
 class JupyterManager(QWidget):
@@ -87,7 +85,7 @@ class JupyterManager(QWidget):
         self.text_output.append(f'Activating virtual environment... {env_name}')
         self.create_env = f'python -m venv {env_name}'
         if os.name == 'posix':
-            self.activate_env = f'source {env_name}/bin/activate'
+            self.activate_env = f'. {env_name}/bin/activate'
             self.install_packages = f'pip install jupyter {pkg_name}'
         else:
             self.activate_env = f'{env_name}\\Scripts\\activate'
