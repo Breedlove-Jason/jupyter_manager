@@ -11,41 +11,43 @@ from colorama import init
 class JupyterManager(QWidget):
     def __init__(self):
         super().__init__()
-        self.init_ui()
         self.process = None
+        self.create_env = None
+        self.activate_env = None
+        self.install_packages = None
 
         # Import Fields
         self.env_label = QLabel('Environment Name')
         self.env_label.setStyleSheet('font-size: 15px; font-weight: bold;')
         self.env_input = QLineEdit()
-        self.env_input.setStyleSheet('font-size: 15px; "background-color: #9D73FA; font-weight: bold;')
+        self.env_input.setStyleSheet('font-size: 15px; background-color: #9D73FA; font-weight: bold;')
         self.env_input.setPlaceholderText('Enter Environment Name')
 
         self.pkg_label = QLabel('Package Name')
         self.pkg_label.setStyleSheet('font-size: 15px; font-weight: bold;')
         self.pkg_input = QLineEdit()
-        self.pkg_input.setStyleSheet('font-size: 15px; "background-color: #9D73FA; font-weight: bold;')
+        self.pkg_input.setStyleSheet('font-size: 15px; background-color: #9D73FA; font-weight: bold;')
         self.pkg_input.setPlaceholderText('Enter Package Name (comma-separated)')
 
         self.port_label = QLabel('Port Number')
         self.port_label.setStyleSheet('font-size: 15px; font-weight: bold;')
         self.port_input = QLineEdit()
-        self.port_input.setStyleSheet('font-size: 15px; "background-color: #9D73FA; font-weight: bold;')
+        self.port_input.setStyleSheet('font-size: 15px; background-color: #9D73FA; font-weight: bold;')
         self.port_input.setPlaceholderText('Enter Port Number')
 
         # Create and launch button
         self.create_button = QPushButton('Create and Launch')
-        self.create_button.setStyleSheet('background-color #9D73FA; font-size: 15px; font-weight: bold;')
+        self.create_button.setStyleSheet('background-color: #9D73FA; font-size: 15px; font-weight: bold;')
         self.create_button.clicked.connect(self.create_env_launch_jupyter)
 
         # Kill button
         self.kill_button = QPushButton('Kill Jupyter Server')
-        self.kill_button.setStyleSheet('background-color #9D73FA; font-size: 15px; font-weight: bold;')
+        self.kill_button.setStyleSheet('background-color: #9D73FA; font-size: 15px; font-weight: bold;')
         self.kill_button.clicked.connect(self.kill_jupyter)
 
         # Text output field
         self.text_output = QTextEdit()
-        self.text_output.setStyleSheet('background-color #F060C3; font-size: 15px; font-weight: bold;')
+        self.text_output.setStyleSheet('background-color: #F060C3; font-size: 15px; font-weight: bold;')
         self.init_ui()
 
     def init_ui(self):
@@ -77,7 +79,37 @@ class JupyterManager(QWidget):
         self.show()
 
     def create_env_launch_jupyter(self):
-        pass
+        env_name = self.env_input.text()
+        pkg_name = self.pkg_input.text().replace(',', ' ')
+        port_num = self.port_input.text()
+
+        # Activate virtual environment
+        self.text_output.append(f'Activating virtual environment... {env_name}')
+        self.create_env = f'python -m venv {env_name}'
+        if os.name == 'posix':
+            self.activate_env = f'source {env_name}/bin/activate'
+            self.install_packages = f'pip install jupyter {pkg_name}'
+        else:
+            self.activate_env = f'{env_name}\\Scripts\\activate'
+            self.install_packages = f'{env_name}\\Scripts\\pip install jupyter {pkg_name}'
+
+        try:
+            subprocess.run(self.create_env, shell=True, check=True, stderr=subprocess.STDOUT)
+            subprocess.run(self.activate_env, shell=True, check=True, stderr=subprocess.STDOUT)
+            subprocess.run(self.install_packages, shell=True, check=True, stderr=subprocess.STDOUT)
+            self.text_output.append(f'Virtual environment created and activated successfully!')
+        except subprocess.CalledProcessError as e:
+            self.text_output.append(f'Error creating virtual environment: {e.output}')
+            return
+        return
+
 
     def kill_jupyter(self):
         pass
+
+
+if __name__ == '__main__':
+    app = QApplication(sys.argv)
+    jupyter = JupyterManager()
+    jupyter.show()
+    sys.exit(app.exec_())
