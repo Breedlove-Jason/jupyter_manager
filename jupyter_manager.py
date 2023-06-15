@@ -11,10 +11,6 @@ from colorama import init
 class JupyterManager(QWidget):
     def __init__(self):
         super().__init__()
-        self.process = None
-        self.create_env = None
-        self.activate_env = None
-        self.install_packages = None
 
         # Import Fields
         self.env_label = QLabel('Environment Name')
@@ -50,6 +46,11 @@ class JupyterManager(QWidget):
         self.text_output.setStyleSheet('background-color: #F060C3; font-size: 15px; font-weight: bold;')
         self.init_ui()
 
+        self.process = None
+        self.create_env = None
+        self.activate_env = None
+        self.install_packages = None
+
     def init_ui(self):
         # Add labels and input fields to layout
         form_layout = QVBoxLayout()
@@ -81,7 +82,6 @@ class JupyterManager(QWidget):
     def create_env_launch_jupyter(self):
         env_name = self.env_input.text()
         pkg_name = self.pkg_input.text().replace(',', ' ')
-        port_num = self.port_input.text()
 
         # Activate virtual environment
         self.text_output.append(f'Activating virtual environment... {env_name}')
@@ -103,9 +103,34 @@ class JupyterManager(QWidget):
             return
         return
 
+    def launch_jupyter(self):
+        port_num = self.port_input.text()
+        self.text_output.append('Launching Jupyter Notebook...')
+        launch_jupyter = f'jupyter notebook --port={port_num}'
+        self.process = subprocess.Popen(launch_jupyter, shell=True, universal_newlines=True, stdout=subprocess.PIPE,
+                                        stderr=subprocess.PIPE)
+        thread = threading.Thread(target=self.reader_thread, args=(self.process,))
+        thread.start()
+        self.text_output.append(f'Jupyter Notebook launched successfully!')
 
     def kill_jupyter(self):
-        pass
+        if self.process is None:
+            self.text_output.append('No Jupyter Notebook running!')
+            return
+        self.text_output.append('Killing Jupyter Notebook...')
+        self.process.kill()
+        self.text_output.append('Jupyter Notebook killed successfully!')
+        self.process = None
+
+    def reader_thread(self, process):
+        while True:
+            output = process.stdout.readline()
+            if output == '' and process.poll() is not None:
+                break
+            if output:
+                self.text_output.append(output.strip())
+        rc = process.poll()
+        return rc
 
 
 if __name__ == '__main__':
