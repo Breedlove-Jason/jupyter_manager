@@ -1,10 +1,7 @@
-Certainly! Here's an enhanced version of the README.md file:
-
-```markdown
 # Jupyter Manager
 
 Jupyter Manager is a graphical application built using PyQt5 that simplifies the process of creating and launching Jupyter Notebook environments. It provides a user-friendly interface to configure virtual environments, install packages, and start Jupyter Notebook servers.
-
+![jupyter_manager.png](jupyter_manager.png)
 ## Prerequisites
 
 Before using Jupyter Manager, make sure you have the following prerequisites installed on your system:
@@ -54,6 +51,4 @@ Contributions are welcome! If you have any ideas, bug fixes, or improvements, pl
 ## License
 
 This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
-```
 
-Feel free to customize and modify the content according to your needs.
